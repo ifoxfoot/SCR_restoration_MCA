@@ -1,0 +1,108 @@
+---
+title: "SCR weeds vs fire risk"
+author: "Iris Foxfoot"
+date: "10/21/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(raster)
+library(fasterize)
+library(rgdal)
+library(rgeos)
+library(here)
+library(sp)
+library(sf)
+library(tmap)
+library(viridis)
+library(janitor)
+```
+
+## READ IN DATA
+
+```{r}
+#VEGETAION LAYER FOR LOWER SC (INCLUDES ARUNDO)
+
+#read in veg layer for lower Santa Clara Watershed
+bios_veg_layer <- st_read(here("bios_veg_layer", "ds983.gdb")) %>% 
+  filter(!st_is_empty(.)) %>% 
+  clean_names()
+```
+
+Insert link to data here
+
+```{r}
+#TERRESTRIAL BIODIVERSITY LAYERS FROM ACE
+
+#terrestrial rare species
+t_rare_species <- st_read(here("ACE_Summary_Datasets", "ACE_Summary_Datasets", "ds2709.gdb"))
+
+#terrestrial irreplaceable habitat
+t_irreplaceable_habitat <- st_read(here("ACE_Summary_Datasets", "ACE_Summary_Datasets", "ds2715.gdb"))
+
+#....etc
+
+```
+
+Insert link to data here
+
+```{r}
+#RASTER OF ARUNDO 2006 (used for extent purposes)
+arundo_06 <- raster(here("arundo_05", "arundo_cov_05.tif"))
+
+arundo_06
+```
+
+## Calculating Rare Species Score Per Polygon
+
+In this section biodiversity data will be rasterized, clipped, etc. other small changes to initial format of data will take place here.
+
+```{r}
+#CONVERT TERRESTRIAL RARE SPECIES POLYGON TO RASTER
+
+#rasterize the polygon, using RarRankEco as the raster value
+t_rare_species_raster <- fasterize(t_rare_species, arundo_06, "RarRankEco")
+
+#plot
+plot(t_rare_species_raster)
+```
+
+```{r}
+#extract terrestrial rare species score values for each veg polygon
+extract_t_rare_species <- raster::extract(t_rare_species_raster, bios_veg_layer, method="simple", fun=mean, weights=TRUE, normalizeWeights=TRUE, sp = TRUE)
+```
+
+```{r}
+#convert to sf (sf makes a polygon layer like a dataframe so you can use tidyverse commands on it)
+extract_t_rare_sf <- st_as_sf(extract_t_rare_species)
+```
+
+```{r}
+#fixing STUPID geometry issues with this BROKEN ASS LAYER
+
+sf::sf_use_s2(FALSE) #updated version of the sf package causes troubles so not using it
+
+extract_t_rare_sf %>%  st_buffer(dist = 0)
+```
+
+```{r}
+#viewing
+tmap_mode("view")
+
+tm_shape(extract_t_rare_species) +
+    tm_polygons("layer")
+```
+
+
+## Filtring for riparian forest with arundo
+
+```{r}
+#make a subset that is riparian forest
+riparian_forest <- bios_veg_layer  %>% 
+  filter(calvegname == c("Black Cottonwood", "Black Walnut", "California Sycamore", "Coast Live Oak", "Fremont Cottonwood", "Riparian Mixed Hardwood")) %>% 
+  filter(arundo_cov != 0)
+```
+
+
