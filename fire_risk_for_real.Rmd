@@ -1,0 +1,62 @@
+---
+title: "fire_risk_for_real"
+author: "Iris Foxfoot"
+date: "11/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+library(here)
+library(sp)
+library(sf)
+library(raster)
+```
+
+```{r}
+#read in veg layer for lower Santa Clara Watershed
+bios_veg_layer <- st_read(here("bios_veg_layer", "ds983.gdb")) %>% 
+  filter(!st_is_empty(.)) %>% 
+  clean_names() %>% 
+  st_buffer(dist = 0)
+```
+
+```{r}
+bios_veg_layer_forest <- bios_veg_layer %>% 
+  filter(calvegname %in% c("Black Cottonwood", "Black Walnut", "California Sycamore", "Coast Live Oak", "Fremont Cottonwood", "Riparian Mixed Hardwood", "Willow (tree)"))
+```
+
+```{r}
+bios_veg_layer_buffered <- bios_veg_layer_forest %>% 
+  st_buffer(dist = 1000)
+```
+
+```{r}
+options(sf_max.plot=1)
+plot(bios_veg_layer_buffered)
+```
+
+```{r}
+options(sf_max.plot = 1)
+plot(bios_veg_layer)
+```
+
+```{r}
+options(sf_max.plot = 1)
+plot(bios_veg_layer_forest)
+```
+
+
+
+```{r}
+#NOT SURE IF WORKED CORRECTLY
+lat <- 34.408988
+
+long <- -118.667452
+
+point <- mapproj::mapproject(long, lat, proj = "")
+```
+
+

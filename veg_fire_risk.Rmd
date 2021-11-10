@@ -10,13 +10,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(raster)
 library(fasterize)
-library(rgdal)
-library(rgeos)
 library(here)
 library(sp)
 library(sf)
 library(tmap)
-library(viridis)
 library(janitor)
 ```
 
@@ -84,7 +81,7 @@ extract_t_rare_sf <- st_as_sf(extract_t_rare_species)
 
 sf::sf_use_s2(FALSE) #updated version of the sf package causes troubles so not using it
 
-extract_t_rare_sf %>%  st_buffer(dist = 0)
+extract_t_rare_sf %>% st_buffer(dist = 0)
 ```
 
 ```{r}
