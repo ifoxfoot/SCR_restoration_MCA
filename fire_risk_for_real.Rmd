@@ -22,9 +22,7 @@ bios_veg_layer <- st_read(here("bios_veg_layer", "ds983.gdb")) %>%
   filter(!st_is_empty(.)) %>% 
   clean_names() %>% 
   st_buffer(dist = 0)
-```
 
-```{r}
 #plot data to view data
 options(sf_max.plot = 1)
 plot(bios_veg_layer)
@@ -52,7 +50,7 @@ bios_veg_layer_flammable <- bios_veg_layer %>%
   mutate(flammable = case_when(calvegname %in% c("Non-Native/Invasive Forb/Grass", "Perennial Grasses and Forbs", "Basin Sagebrush", "California Sagebrush", "Soft Scrub-Mixed Chaparral", "Annual Grasses and Forbs") ~ 1, T ~ 0))
 
 #rasterize the polygon, using flammable category as the raster value
-bios_veg_layer_raster <- fasterize(bios_veg_layer_flame, blank_raster, "flammable")
+bios_veg_layer_raster <- fasterize(bios_veg_layer_flammable, blank_raster, "flammable")
 
 #plot it to view
 plot(bios_veg_layer_raster)
@@ -82,24 +80,29 @@ plot(bios_veg_layer_buffered)
 #not working correctly yet!!!
 
 #extract flammable values for each polygon (unbuffered)
-extract_flammable_unbuffered <- raster::extract(bios_veg_layer_raster, bios_veg_layer_forest, fun=sum, sp = T)
-
-#convert to sf
-flammable_unbuffered_sp <- extract_flammable_unbuffered %>% 
-  st_as_sf() %>% 
-  mutate(extract_unbuffered = layer)
+extract_flammable_unbuffered <- raster::extract(bios_veg_layer_raster, bios_veg_layer_forest, fun=mean, na.rm = T, df = T)
+#check to make sure values are zero
 
 #extract flammable values for each polygon (buffered)
-extract_flammable_buffered <- raster::extract(bios_veg_layer_raster, bios_veg_layer_buffered, fun=sum, sp = T)
+extract_flammable_buffered <- raster::extract(bios_veg_layer_raster, bios_veg_layer_buffered, fun=mean, na.rm = T, sp =T)
 
 #convert to sf
-flammable_buffered_sp <- extract_flammable_buffered %>% 
-  st_as_sf() %>% 
-  mutate(extract_unbuffered = layer)
+extract_flammable_buffered_sf <- st_as_sf(extract_flammable_buffered)
+
+#bind to unbuffered forests dataframe
+forests_flammable <- merge(bios_veg_layer_forest, extract_flammable_buffered_sf, by= "ID")
 ```
 
 ```{r}
+library(tmap)
+
 #make map ranking them
+tmap_mode("view")
+
+tm_basemap("Esri.WorldTopoMap") +
+tm_shape(extract_flammable_buffered_sf) +
+  tm_fill("layer", title = "Tree Species", palette = "Spectral") +
+  tm_view(set.view = 12)
 ```
 
 
