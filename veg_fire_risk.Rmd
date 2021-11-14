@@ -91,15 +91,3 @@ tmap_mode("view")
 tm_shape(extract_t_rare_species) +
     tm_polygons("layer")
 ```
-
-
-## Filtring for riparian forest with arundo
-
-```{r}
-#make a subset that is riparian forest
-riparian_forest <- bios_veg_layer  %>% 
-  filter(calvegname == c("Black Cottonwood", "Black Walnut", "California Sycamore", "Coast Live Oak", "Fremont Cottonwood", "Riparian Mixed Hardwood")) %>% 
-  filter(arundo_cov != 0)
-```
-
-

@@ -13,6 +13,7 @@ library(here)
 library(sp)
 library(sf)
 library(raster)
+library(fasterize)
 ```
 
 ```{r}
@@ -24,42 +25,86 @@ bios_veg_layer <- st_read(here("bios_veg_layer", "ds983.gdb")) %>%
 ```
 
 ```{r}
-bios_veg_layer_forest <- bios_veg_layer %>% 
-  filter(calvegname %in% c("Black Cottonwood", "Black Walnut", "California Sycamore", "Coast Live Oak", "Fremont Cottonwood", "Riparian Mixed Hardwood", "Willow (tree)"))
-```
-
-```{r}
-bios_veg_layer_buffered <- bios_veg_layer_forest %>% 
-  st_buffer(dist = 1000)
-```
-
-```{r}
-options(sf_max.plot=1)
-plot(bios_veg_layer_buffered)
-```
-
-```{r}
+#plot data to view data
 options(sf_max.plot = 1)
 plot(bios_veg_layer)
 ```
 
 ```{r}
+#create a raster covering the same area that the bios veg layer covers
+blank_raster <- raster(ncol=5366, nrow=2992, xmn=67134.41, xmx=120794.4, ymn=-423477, ymx=-393557)
+
+#set resolution
+res(blank_raster) <- 10
+
+#set crs to match bios veg layer
+crs(blank_raster) <- "+proj=aea +lat_0=0 +lon_0=-120 +lat_1=34 +lat_2=40.5 +x_0=0 +y_0=-4000000 +datum=NAD83 +units=m +no_defs"
+
+#call it to view information
+blank_raster
+```
+
+```{r}
+#At a later date....determine if there are more flammable things to include
+
+#create new dataframe that has a column where flammable veg is coded as one, all else zero
+bios_veg_layer_flammable <- bios_veg_layer %>% 
+  mutate(flammable = case_when(calvegname %in% c("Non-Native/Invasive Forb/Grass", "Perennial Grasses and Forbs", "Basin Sagebrush", "California Sagebrush", "Soft Scrub-Mixed Chaparral", "Annual Grasses and Forbs") ~ 1, T ~ 0))
+
+#rasterize the polygon, using flammable category as the raster value
+bios_veg_layer_raster <- fasterize(bios_veg_layer_flame, blank_raster, "flammable")
+
+#plot it to view
+plot(bios_veg_layer_raster)
+```
+
+```{r}
+#filter bios veg layer for polygons containing trees...aka forests
+bios_veg_layer_forest <- bios_veg_layer %>% 
+  filter(calvegname %in% c("Black Cottonwood", "Black Walnut", "California Sycamore", "Coast Live Oak", "Fremont Cottonwood", "Riparian Mixed Hardwood", "Willow (tree)"))
+
+#plot filtered forest polygons to view data
 options(sf_max.plot = 1)
 plot(bios_veg_layer_forest)
 ```
 
-
-
 ```{r}
-#NOT SURE IF WORKED CORRECTLY
-lat <- 34.408988
+#buffer forest polygons to 10 m
+bios_veg_layer_buffered <- bios_veg_layer_forest %>% 
+  st_buffer(dist = 10)
 
-long <- -118.667452
-
-point <- mapproj::mapproject(long, lat, proj = "")
+#plot buffered polygons
+options(sf_max.plot=1)
+plot(bios_veg_layer_buffered)
 ```
+
 ```{r}
-#hi 
+#not working correctly yet!!!
+
+#extract flammable values for each polygon (unbuffered)
+extract_flammable_unbuffered <- raster::extract(bios_veg_layer_raster, bios_veg_layer_forest, fun=sum, sp = T)
+
+#convert to sf
+flammable_unbuffered_sp <- extract_flammable_unbuffered %>% 
+  st_as_sf() %>% 
+  mutate(extract_unbuffered = layer)
+
+#extract flammable values for each polygon (buffered)
+extract_flammable_buffered <- raster::extract(bios_veg_layer_raster, bios_veg_layer_buffered, fun=sum, sp = T)
+
+#convert to sf
+flammable_buffered_sp <- extract_flammable_buffered %>% 
+  st_as_sf() %>% 
+  mutate(extract_unbuffered = layer)
+```
+
+```{r}
+#make map ranking them
+```
+
+
+```{r}
+#st_write(polygon_name, here("my_shapefile.shp"))
 ```
 
 
