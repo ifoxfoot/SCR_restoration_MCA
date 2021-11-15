@@ -1,0 +1,74 @@
+---
+title: "wtf"
+author: "Bri Baker"
+date: "11/9/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(janitor)
+library(here)
+library(sf)
+library(rgeos)
+
+```
+
+
+
+```{r}
+
+bios_veg_layer <- st_read(here("bios_veg_layer", 
+                               "ds983.gdb")) %>% 
+  filter(!st_is_empty(.)) %>% 
+  clean_names()
+
+riparian_forest <- bios_veg_layer  %>% 
+  filter(calvegname %in% c("Black Cottonwood", 
+                         "Black Walnut", 
+                         "California Sycamore", 
+                         "Coast Live Oak", 
+                         "Fremont Cottonwood", 
+                         "Riparian Mixed Hardwood"),
+         arundo_cov != 0)
+
+
+```
+
+```{r}
+
+riparian_size_reclass <- riparian_forest %>% 
+  select(acres) %>% 
+  mutate(size_class = ntile(acres, 5))
+
+
+```
+
+```{r}
+top_shed <- st_sfc(st_point(c(-118.667452, 34.408988))) %>% 
+  st_set_crs("WGS84") %>% 
+  st_transform(st_crs(riparian_forest))
+
+riparian_distance_top <- riparian_size_reclass %>% 
+  mutate(
+    distance_top = st_distance(Shape, top_shed),
+    distance_class = ntile(distance_top, 5),
+    distance_class = case_when(
+      distance_class == 1 ~ 5,
+      distance_class == 2 ~ 4,
+      distance_class == 3 ~ 3,
+      distance_class == 4 ~ 2,
+      distance_class == 5 ~ 1
+    ))
+  
+  
+```
+
+
+```{r}
+resto_success <- riparian_distance_top %>% 
+  mutate(resto_success = ntile((size_class + distance_class), 5))
+```
+
