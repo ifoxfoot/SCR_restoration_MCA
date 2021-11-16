@@ -62,13 +62,61 @@ riparian_distance_top <- riparian_size_reclass %>%
       distance_class == 4 ~ 2,
       distance_class == 5 ~ 1
     ))
-  
-  
-```
 
+
+```
 
 ```{r}
 resto_success <- riparian_distance_top %>% 
   mutate(resto_success = ntile((size_class + distance_class), 5))
 ```
 
+```{r}
+#loading tmap
+require(tmap)
+
+#SIZE CLASS 
+
+#viewing
+tmap_mode("view")
+
+tm_shape(resto_success) +
+    tm_polygons("size_class")
+```
+
+```{r}
+#DISTANCE CLASS 
+
+#viewing
+tmap_mode("view")
+
+tm_shape(resto_success) +
+    tm_polygons("distance_class")
+```
+
+```{r}
+#RESTORATION SUCCESS
+
+#viewing
+tmap_mode("view")
+
+tm_shape(resto_success) +
+    tm_polygons("resto_success")
+```
+
+```{r}
+#plot using ggplot2
+ggplot() + 
+  geom_sf(data = resto_success, aes(fill = resto_success)) +
+  theme_minimal()
+```
+
+Potential next steps
+
+ - merge with riparian forest polygon so other data can be viewed
+ 
+ - export as shapefile
+ 
+ - Match coding styles with other rmds. (add annotations here, add vertical structure to other rmds)
+ 
+ - Look at CRS

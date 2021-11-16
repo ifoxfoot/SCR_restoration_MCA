@@ -91,3 +91,6 @@ tmap_mode("view")
 tm_shape(extract_t_rare_species) +
     tm_polygons("layer")
 ```
+
+
+
