@@ -100,6 +100,6 @@ conservation_classed <- extract_t_rare_sf %>%
 
 ```{r}
 #write as shapefile
-#st_write(conservation_classed, "conservation_classed.shp", here("shapefiles_written"))
+#st_write(conservation_classed, here("shapefiles_written", "conservation_classed.shp"))
 ```
 
