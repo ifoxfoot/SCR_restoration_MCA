@@ -92,5 +92,14 @@ tm_shape(extract_t_rare_species) +
     tm_polygons("layer")
 ```
 
+```{r}
+#reclass 
+conservation_classed <- extract_t_rare_sf %>% 
+  mutate(conservation_success = ntile(layer, 5))
+```
 
+```{r}
+#write as shapefile
+#st_write(conservation_classed, "conservation_classed.shp", here("shapefiles_written"))
+```
 

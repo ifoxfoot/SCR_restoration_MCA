@@ -90,7 +90,7 @@ extract_flammable_buffered <- raster::extract(bios_veg_layer_raster, bios_veg_la
 extract_flammable_buffered_sf <- st_as_sf(extract_flammable_buffered)
 
 #bind to unbuffered forests dataframe
-forests_flammable <- merge(bios_veg_layer_forest, extract_flammable_buffered_sf, by= "ID")
+forests_flammable <- merge(bios_veg_layer_forest, extract_flammable_buffered, by= "ID")
 ```
 
 ```{r}
@@ -105,9 +105,14 @@ tm_shape(extract_flammable_buffered_sf) +
   tm_view(set.view = 12)
 ```
 
+```{r}
+#class
+fire_risk_classed <- extract_flammable_buffered_sf %>% 
+  mutate(fire_risk = ntile(layer, 5))
+```
 
 ```{r}
-#st_write(polygon_name, here("my_shapefile.shp"))
+#st_write(fire_risk_classed, here("shapefiles_written", "fire_risk.shp"))
 ```
 
 
