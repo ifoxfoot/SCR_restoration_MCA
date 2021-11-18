@@ -62,7 +62,8 @@ plot(bios_veg_layer_raster)
 ```{r}
 #filter bios veg layer for polygons containing trees...aka forests
 bios_veg_layer_forest <- bios_veg_layer %>% 
-  filter(calvegname %in% c("Black Cottonwood", "Black Walnut", "California Sycamore", "Coast Live Oak", "Fremont Cottonwood", "Riparian Mixed Hardwood", "Willow (tree)"))
+  filter(calvegname %in% c("Black Cottonwood", "Black Walnut", "California Sycamore", "Coast Live Oak", "Fremont Cottonwood", "Riparian Mixed Hardwood", "Willow (tree)")) %>% 
+  filter(arundo_cov!=0)
 
 #plot filtered forest polygons to view data
 options(sf_max.plot = 1)
@@ -81,7 +82,7 @@ plot(bios_veg_layer_buffered)
 
 ```{r}
 #extract flammable values for each polygon (unbuffered)
-extract_flammable_unbuffered <- raster::extract(bios_veg_layer_raster, bios_veg_layer_forest, fun=mean, na.rm = T, df = T)
+# extract_flammable_unbuffered <- raster::extract(bios_veg_layer_raster, bios_veg_layer_forest, fun=mean, na.rm = T, df = T)
 #check to make sure values are zero
 
 #extract flammable values for each polygon (buffered)
@@ -99,7 +100,7 @@ tmap_mode("view")
 
 tm_basemap("Esri.WorldTopoMap") +
 tm_shape(extract_flammable_buffered_sf) +
-  tm_fill("layer", title = "Tree Species", palette = "Spectral") +
+  tm_fill("layer", title = "Fire Risk", palette = "Spectral") +
   tm_view(set.view = 12)
 ```
 
@@ -110,14 +111,14 @@ fire_risk_classed <- extract_flammable_buffered_sf %>%
 ```
 
 ```{r}
-fire_risk_classed_df <- as.data.frame(fire_risk_classed)
+fire_risk_classed_df <- as_data_frame(fire_risk_classed) %>% 
+  dplyr::select("fire_risk", "ID")
 
-fire_risk_forest_polygon <- merge(bios_veg_layer_forest, fire_risk_classed_df, by = "ID")
+fire_risk_forest_polygon <- merge(fire_risk_classed_df, bios_veg_layer_forest, by = "ID")
 ```
 
-
 ```{r}
-#st_write(fire_risk_forest_polygon, here("shapefiles_written", "fire_risk.shp"))
+st_write(fire_risk_forest_polygon, here("shapefiles_written", "fire_risk.shp"))
 ```
 
 
