@@ -1,0 +1,84 @@
+---
+title: "Final-Prioritization"
+author: "Bri Baker"
+date: "11/18/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(sf)
+library(tidyverse)
+library(tmap)
+```
+
+
+```{r}
+##Read in layers
+#restoration success, classified 1-5, NAD83 / California Albers
+resto <- st_read(
+  here("shapefiles_written", "resto_classed.shp"))
+
+#wildfire risk, classified 1-5, NAD83 / California Albers
+fire <- st_read(
+  here("shapefiles_written", "fire_risk.shp"))
+
+#Biodiversity score, classified 1-5, NAD83 / California Albers
+biodiv <- st_read(
+  here("shapefiles_written", "conservation_classed.shp"))
+```
+
+```{r}
+## Filter biodiv to riparian forest
+
+biodiv <- biodiv %>% 
+  filter(calvgnm %in% c("Black Cottonwood", 
+                         "Black Walnut", 
+                         "California Sycamore", 
+                         "Coast Live Oak", 
+                         "Fremont Cottonwood", 
+                         "Riparian Mixed Hardwood",
+                         "Willow (tree)"),
+         arnd_cv != 0)
+
+```
+
+
+
+```{r}
+##Combine layer info into one priority layer
+
+resto <- resto %>% 
+  select(acres:rst_scc)
+
+biodiv <- biodiv %>% 
+  select(layer:cnsrvt_)
+
+priority <- cbind(resto, fire)
+  
+priority <- cbind(priority, biodiv)
+
+```
+
+
+```{r}
+## do MCA
+
+priority <- priority %>% 
+  mutate(
+    resto_priority = rst_scc + fir_rsk + cnsrvt_
+  )
+
+
+```
+
+
+
+```{r}
+## Write shapefile
+
+st_write(priority, here("shapefiles_written", "restoration_priority.shp"))
+
+```
+

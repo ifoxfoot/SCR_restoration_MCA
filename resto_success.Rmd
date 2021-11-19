@@ -1,5 +1,5 @@
 ---
-title: "wtf"
+title: "Restoration Success"
 author: "Bri Baker"
 date: "11/9/2021"
 output: html_document
@@ -31,7 +31,8 @@ riparian_forest <- bios_veg_layer  %>%
                          "California Sycamore", 
                          "Coast Live Oak", 
                          "Fremont Cottonwood", 
-                         "Riparian Mixed Hardwood"),
+                         "Riparian Mixed Hardwood",
+                         "Willow (tree)"),
          arundo_cov != 0)
 
 
