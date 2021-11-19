@@ -1,0 +1,65 @@
+---
+title: "WHP Fire risk"
+author: "Iris Foxfoot"
+date: "11/18/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(raster)
+library(sf)
+library(janitor)
+```
+
+```{r}
+#read in veg layer for lower Santa Clara Watershed
+bios_veg_layer <- st_read(here("bios_veg_layer", "ds983.gdb")) %>% 
+  filter(!st_is_empty(.)) %>% 
+  clean_names()
+```
+
+```{r}
+#read in raster layer for wildfire hazard potential
+WHP_ca <- raster(here("WHP_CA.tif"))
+```
+
+```{r}
+extract_whp <- raster::extract(WHP_ca, bios_veg_layer, method="simple", fun=mean, sp = TRUE)
+```
+
+```{r}
+#convert to sf (sf makes a polygon layer like a dataframe so you can use tidyverse commands on it)
+extract_whp <- st_as_sf(extract_whp)
+
+#fixing STUPID geometry issues with this BROKEN ASS LAYER
+
+sf::sf_use_s2(FALSE) #updated version of the sf package causes troubles so not using it
+
+extract_whp %>% st_buffer(dist = 0)
+```
+
+```{r}
+#reclass 
+whp_classed <- extract_whp %>% 
+  mutate(WHP_class = ntile(WHP_CA, 5)) %>% 
+  filter(calvegname %in% c("Black Cottonwood", "Black Walnut", "California Sycamore", "Coast Live Oak", "Fremont Cottonwood", "Riparian Mixed Hardwood", "Willow (tree)")) %>% 
+  filter(arundo_cov!=0)
+```
+
+```{r}
+require(tmap)
+#viewing
+
+tmap_mode("view")
+
+tm_shape(whp_classed) +
+    tm_polygons("WHP_CA")
+```
+
+```{r}
+st_write(whp_classed, here("shapefiles_written", "WHP_fire_risk.shp"))
+```
+
