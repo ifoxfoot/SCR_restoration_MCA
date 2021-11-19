@@ -31,7 +31,8 @@ riparian_forest <- bios_veg_layer  %>%
                          "California Sycamore", 
                          "Coast Live Oak", 
                          "Fremont Cottonwood", 
-                         "Riparian Mixed Hardwood"),
+                         "Riparian Mixed Hardwood",
+                         "Willow (tree)"),
          arundo_cov != 0)
 
 
