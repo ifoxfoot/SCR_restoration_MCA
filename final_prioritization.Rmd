@@ -22,7 +22,7 @@ resto <- st_read(
 
 #wildfire risk, classified 1-5, NAD83 / California Albers
 fire <- st_read(
-  here("shapefiles_written", "fire_risk.shp"))
+  here("shapefiles_written", "WHP_fire_risk.shp"))
 
 #Biodiversity score, classified 1-5, NAD83 / California Albers
 biodiv <- st_read(
@@ -67,7 +67,7 @@ priority <- cbind(priority, biodiv)
 
 priority <- priority %>% 
   mutate(
-    resto_priority = rst_scc + fir_rsk + cnsrvt_
+    resto_priority = rst_scc + WHP_cls + cnsrvt_
   )
 
 
@@ -78,7 +78,7 @@ priority <- priority %>%
 ```{r}
 ## Write shapefile
 
-st_write(priority, here("shapefiles_written", "restoration_priority.shp"))
+st_write(priority, here("shapefiles_written", "restoration_priority_whp.shp"))
 
 ```
 
