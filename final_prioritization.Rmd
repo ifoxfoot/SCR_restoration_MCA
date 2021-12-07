@@ -13,6 +13,9 @@ library(tidyverse)
 library(tmap)
 ```
 
+## REQUIRED DATA
+
+All required data layers are in this github repo
 
 ```{r}
 ##Read in layers

@@ -17,6 +17,14 @@ library(tmap)
 library(janitor)
 ```
 
+## REQUIRED DATA
+
+- Bios vegetation layer is available to download here https://map.dfg.ca.gov/metadata/ds0983.html. Download the dataset and label the folder "bios_veg_layer" in the r project folder.
+
+- ACE summary datasets are available for download here https://wildlife.ca.gov/Data/Analysis/ACE/Registration (registration is required). Label the downloaded folder "ACE_summary_Datasets" in the r project folder.
+
+- the arundo_05 layer is available in this github repository
+
 ## READ IN DATA
 
 ```{r}
@@ -28,7 +36,6 @@ bios_veg_layer <- st_read(here("bios_veg_layer", "ds983.gdb")) %>%
   clean_names()
 ```
 
-Insert link to data here
 
 ```{r}
 #TERRESTRIAL BIODIVERSITY LAYERS FROM ACE
@@ -36,14 +43,8 @@ Insert link to data here
 #terrestrial rare species
 t_rare_species <- st_read(here("ACE_Summary_Datasets", "ACE_Summary_Datasets", "ds2709.gdb"))
 
-#terrestrial irreplaceable habitat
-t_irreplaceable_habitat <- st_read(here("ACE_Summary_Datasets", "ACE_Summary_Datasets", "ds2715.gdb"))
-
-#....etc
-
 ```
 
-Insert link to data here
 
 ```{r}
 #RASTER OF ARUNDO 2006 (used for extent purposes)
@@ -68,7 +69,14 @@ plot(t_rare_species_raster)
 
 ```{r}
 #extract terrestrial rare species score values for each veg polygon
-extract_t_rare_species <- raster::extract(t_rare_species_raster, bios_veg_layer, method="simple", fun=mean, weights=TRUE, normalizeWeights=TRUE, sp = TRUE)
+extract_t_rare_species <- raster::extract(
+  t_rare_species_raster, 
+  bios_veg_layer, 
+  method="simple", 
+  fun=mean, 
+  weights=TRUE, 
+  normalizeWeights=TRUE, 
+  sp = TRUE)
 ```
 
 ```{r}
@@ -77,7 +85,7 @@ extract_t_rare_sf <- st_as_sf(extract_t_rare_species)
 ```
 
 ```{r}
-#fixing STUPID geometry issues with this BROKEN ASS LAYER
+#fixing geometry issues
 
 sf::sf_use_s2(FALSE) #updated version of the sf package causes troubles so not using it
 

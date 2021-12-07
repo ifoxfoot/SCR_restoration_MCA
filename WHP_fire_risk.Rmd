@@ -14,6 +14,13 @@ library(sf)
 library(janitor)
 ```
 
+## REQUIRED DATA
+
+- Bios vegetation layer is available to download here https://map.dfg.ca.gov/metadata/ds0983.html. Download the dataset and label the folder "bios_veg_layer" in the r project folder.
+
+- The wildfire hazard potential layer is available to download here https://wildfirerisk.org/download/. Download the dataset and label the file "WHP_CA.tif" in the r project folder.
+
+
 ```{r}
 #read in veg layer for lower Santa Clara Watershed
 bios_veg_layer <- st_read(here("bios_veg_layer", "ds983.gdb")) %>% 
@@ -34,7 +41,14 @@ plot(WHP_ca)
 
 ```{r}
 #extract mean wildfire hazard potential values per polygon in veg layer
-extract_whp <- raster::extract(WHP_ca, bios_veg_layer, method="simple", fun=mean, weights=TRUE, normalizeWeights=TRUE, sp = TRUE)
+extract_whp <- raster::extract(
+  WHP_ca, 
+  bios_veg_layer, 
+  method="simple", 
+  fun=mean, 
+  weights=TRUE, 
+  normalizeWeights=TRUE, 
+  sp = TRUE)
 ```
 
 ```{r}
