@@ -81,7 +81,7 @@ priority <- priority %>%
 ```{r}
 ## Write shapefile
 
-st_write(priority, here("shapefiles_written", "restoration_priority_whp.shp"))
+#st_write(priority, here("shapefiles_written", "restoration_priority_whp.shp"))
 
 ```
 
