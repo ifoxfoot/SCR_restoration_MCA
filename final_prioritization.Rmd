@@ -85,3 +85,25 @@ priority <- priority %>%
 
 ```
 
+```{r}
+# top sites summary
+
+priority_summary <- priority %>% 
+  select(rst_scc,
+         WHP_cls,
+         cnsrvt_,
+         resto_priority) %>% 
+  filter(rst_scc %in% c(4,5)) # filter top resto success
+
+fire_resto <- priority_summary %>% 
+  filter(WHP_cls %in% c(4,5))
+
+bio_resto <- priority_summary %>% 
+  filter(cnsrvt_ %in% c(4,5))
+
+both_resto <- fire_resto %>% 
+  filter(cnsrvt_ %in% c(4,5))
+
+```
+
+
