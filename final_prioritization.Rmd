@@ -92,7 +92,8 @@ priority_summary <- priority %>%
   select(rst_scc,
          WHP_cls,
          cnsrvt_,
-         resto_priority) %>% 
+         resto_priority,
+         acres) %>% 
   filter(rst_scc %in% c(4,5)) # filter top resto success
 
 fire_resto <- priority_summary %>% 
@@ -106,12 +107,24 @@ both_resto <- fire_resto %>%
 
 # Save as shapefiles
 
-st_write(fire_resto, here("shapefiles_written", "fire_resto.shp"))
+#st_write(fire_resto, here("shapefiles_written", "fire_resto.shp"))
 
-st_write(bio_resto, here("shapefiles_written", "bio_resto.shp"))
+#st_write(bio_resto, here("shapefiles_written", "bio_resto.shp"))
 
-st_write(both_resto, here("shapefiles_written", "both_resto.shp"))
+#st_write(both_resto, here("shapefiles_written", "both_resto.shp"))
 
 ```
 
+```{r}
+# find area
+
+area_fire<- fire_resto %>% 
+  summarise(sum(acres))
+
+area_bio<- bio_resto %>% 
+  summarise(sum(acres))
+
+area_both <- both_resto %>% 
+  summarise(sum(acres))
+```
 
