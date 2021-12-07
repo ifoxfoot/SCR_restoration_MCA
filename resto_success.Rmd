@@ -79,6 +79,12 @@ resto_success <- riparian_distance_top %>%
 ```
 
 ```{r}
+#save shapefile
+st_write(resto_success, here("shapefiles_written", "resto_success.shp"))
+```
+
+
+```{r}
 #loading tmap
 require(tmap)
 
