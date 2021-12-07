@@ -104,6 +104,14 @@ bio_resto <- priority_summary %>%
 both_resto <- fire_resto %>% 
   filter(cnsrvt_ %in% c(4,5))
 
+# Save as shapefiles
+
+st_write(fire_resto, here("shapefiles_written", "fire_resto.shp"))
+
+st_write(bio_resto, here("shapefiles_written", "bio_resto.shp"))
+
+st_write(both_resto, here("shapefiles_written", "both_resto.shp"))
+
 ```
 
 
